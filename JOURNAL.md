@@ -8,11 +8,16 @@
 **Tier:**  Tier 1 
 
 **Problem summary:**
-[In 3–5 sentences, in your own words: what the issue is (not a copy-paste of
-the title), what is currently broken or missing, and what a successful fix
-would accomplish. Naming the part of the codebase it affects is helpful context.]
-
-**Branch name:** [paste branch name here]
+The `/health` endpoint's Redis check tries to connect using `settings.redis_host`
+and `settings.redis_port`, but the `Settings` class doesn't define those
+attributes — it only stores a combined `redis_url`. This causes an
+`AttributeError` every time the health check runs, which gets silently
+caught and reported as "redis: unhealthy," even when Redis is actually
+running fine. This affects the `api` health check route (and touches
+`core/config` where `Settings` is defined). A correct fix would update the
+Redis connection code to use the actual config field(s) available on
+`Settings`, so the health check accurately reflects Redis's real status.
+**Branch name:**fix/155-health-check-redis-host
 
 **Setup confirmation:** [ ] App runs locally at localhost:5173
 
