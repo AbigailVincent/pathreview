@@ -22,29 +22,26 @@ Redis connection code to use the actual config field(s) available on
 **Setup confirmation:** [x] App runs locally at localhost:5173
 
 **Cohort ledger:** [x ] Issue added to cohort ledger
-## Week 8 — Reproduction
+## Week 8 — Reproduction & solution planning
 
-**Reproduction steps:**
-Started the app locally with `make run` (backend on port 8000, frontend on 5173,
-with Postgres/Redis/ChromaDB running via `docker compose up -d`). Hit the health
-check endpoint directly:
+**Reproduction commit link:** https://github.com/AbigailVincent/pathreview/commit/0496aef
 
-curl http://127.0.0.1:8000/health
+**Reproduction summary:**
+Ran the app locally and hit `curl http://127.0.0.1:8000/health`. Server logs
+confirmed the exact predicted error — `'Settings' object has no attribute
+'redis_host'` — causing the endpoint to report Redis as unhealthy even
+though `docker compose ps` showed the Redis container itself running and
+healthy.
 
-**Observed output:**
-{"detail":{"status":"unhealthy","dependencies":{"postgres":"unhealthy","redis":"unhealthy","vector_db":"healthy"},"safety_events_last_hour":0,"timestamp":"2026-07-27T21:30:10.544903"}}
+**PLAN.md link:** https://github.com/AbigailVincent/pathreview/blob/fix/155-health-check-redis-host/PLAN.md
 
-**Server logs confirmed the exact cause:**
-redis_health_check_failed      error="'Settings' object has no attribute 'redis_host'"
+**Walkthrough video (recommended):** N/A — did not record one this week.
 
-This confirms the bug described in issue #155: the Redis health check in
-`api/routes/health.py` references `settings.redis_host` and `settings.redis_port`,
-neither of which exist on the `Settings` class (only `redis_url` is defined in
-`.env`/config). This raises an `AttributeError` every time the health check runs,
-which is silently caught and reported as `"redis": "unhealthy"` — even though
-Docker confirms the Redis container itself is healthy
-(`docker compose ps` shows `pathreview-redis-1 ... (healthy)`).
-
-Note: the same response also showed `"postgres": "unhealthy"`, caused by a
-separate, unrelated bug (raw SQL string needing `text()` wrapping under
+**Blockers or open questions:**
+The same `/health` response also shows `"postgres": "unhealthy"`, caused by
+a separate, unrelated bug (raw SQL string needing `text()` wrapping under
+SQLAlchemy 2.x — this matches issue #154, not mine). Not a blocker, just
+noting it so it's not confused with my actual fix in Week 9. No open
+questions on my own issue at this point — root cause and fix location are
+both clear.
 SQLAlchemy 2.x — this matches issue #154, not my assigned issue).
