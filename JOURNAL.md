@@ -68,7 +68,7 @@ unrelated to this fix) but my change introduces zero new failures.
 
 ## Week 9 — Submission
 
-**PR link:** [will add once opened — see below]
+**PR link:** https://github.com/ascherj/pathreview/pull/787
 
 **Summary:** Fixed issue #155 — the `/health` endpoint's Redis check now
 uses the correct `settings.redis_url` config field instead of nonexistent
