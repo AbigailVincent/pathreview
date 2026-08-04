@@ -45,3 +45,32 @@ noting it so it's not confused with my actual fix in Week 9. No open
 questions on my own issue at this point — root cause and fix location are
 both clear.
 SQLAlchemy 2.x — this matches issue #154, not my assigned issue).
+## Week 9 — Implementation (mid-week check-in)
+
+Implemented the fix in `api/routes/health.py`: the Redis health check now
+builds its client from `settings.redis_url` via `redis.Redis.from_url()`,
+replacing the broken references to the nonexistent `settings.redis_host`
+and `settings.redis_port`. Added a socket timeout (2s) so a slow/unreachable
+Redis can't hang the health check indefinitely.
+
+Verified manually in both directions: with Redis running, `/health` now
+correctly reports `"redis": "healthy"`; with Redis stopped
+(`docker compose stop redis`), it correctly reports `"redis": "unhealthy"`
+with a real connection-timeout error in the logs, instead of the old
+`AttributeError`.
+
+Wrote `tests/unit/test_health.py` with 3 tests covering the healthy case,
+the genuinely-unhealthy case, and a regression test asserting the fix uses
+`settings.redis_url` specifically (guards against this exact bug recurring).
+All 3 pass. Ran the full test suite to confirm no regressions — pre-existing
+failures exist in the suite (tracked separately as issues #158/#159,
+unrelated to this fix) but my change introduces zero new failures.
+
+## Week 9 — Submission
+
+**PR link:** [will add once opened — see below]
+
+**Summary:** Fixed issue #155 — the `/health` endpoint's Redis check now
+uses the correct `settings.redis_url` config field instead of nonexistent
+`redis_host`/`redis_port` attributes, so it accurately reports Redis's real
+status instead of always failing.
