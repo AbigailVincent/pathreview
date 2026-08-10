@@ -73,4 +73,70 @@ unrelated to this fix) but my change introduces zero new failures.
 **Summary:** Fixed issue #155 — the `/health` endpoint's Redis check now
 uses the correct `settings.redis_url` config field instead of nonexistent
 `redis_host`/`redis_port` attributes, so it accurately reports Redis's real
-status instead of always failing.
+status instead of always failing. 
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+No review has come in yet. Per the course note, reviewer feedback isn't
+a feature this term, so I'm not expecting formal comments on PR #787.
+
+**How you responded:**
+N/A — no feedback to respond to.
+
+
+
+### Reflection
+
+**What was harder than you expected?**
+Environment setup took far longer than I expected — way more than the
+actual bug fix. I hit a chain of unrelated issues: PowerShell vs. Git
+Bash confusion, `make` not existing on Windows, Docker Desktop needing
+restarts multiple times, a corrupted `.bashrc`, and Node/npm not being
+installed at all. Even after setup, I ran into repeated file corruption
+issues when editing code through Notepad copy-paste — small things like
+a dropped character turning `async` into `aasync`, or pasting into the
+wrong window entirely. I ended up committing the actual fix through
+GitHub's web editor instead of my local terminal, which felt strange for
+a "real" contribution but got the job done reliably. The lesson: tooling
+friction on someone else's project, on an unfamiliar OS setup, is a real
+and significant part of the work — not a distraction from it.
+
+**What did you learn about working in a large codebase?**
+The actual bug (a wrong attribute name in a config lookup) was tiny —
+maybe 4 lines changed. But confirming it safely meant understanding the
+`Settings` class, checking `.env.example`, running the app end-to-end,
+and reproducing the failure with real logs before touching anything.
+I also learned that a codebase can have multiple, unrelated bugs
+tangled together in the same code path (my Redis bug and a separate
+Postgres bug were both surfacing in the same `/health` endpoint) — and
+part of the job is telling them apart so you don't accidentally scope-
+creep into fixing something that isn't your issue.
+
+**How did AI tools help — and where did they fall short?**
+AI was most useful for the parts that needed broad troubleshooting
+knowledge fast — diagnosing terminal/OS-specific errors, explaining what
+tools like `make`, Docker, and pre-commit hooks were actually doing, and
+drafting boilerplate like the test file and PR description in the
+project's existing style. Where it fell short was anything requiring
+direct file access — repeated manual copy-pasting through Notepad led to
+real corruption (dropped characters, misplaced content between files)
+that took multiple rounds to catch and fix. Working directly in the
+terminal or through GitHub's web editor ended up being more reliable
+than routing every edit through a GUI text editor.
+
+**What would you do differently if you started over?**
+I'd verify my dev environment (Node, Docker, `make`) *before* picking an
+issue, not after, so Week 7 wasn't half spent on tooling. I'd also make
+edits directly via a proper code editor or the GitHub web UI from the
+start, rather than Notepad, to avoid the repeated corruption issues that
+ate up time in Week 9.
+
+**What are you most proud of from this module?**
+Getting a real, verified fix — not just "it compiles," but actually
+proving it in both directions (Redis healthy vs. genuinely down) with
+matching log evidence and a regression test that guards against the
+exact bug coming back. Given how much environment trouble I hit along
+the way, actually landing a clean, tested PR feels like a real result.
